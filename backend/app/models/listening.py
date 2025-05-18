@@ -15,7 +15,6 @@ class ListeningSession(Base):
     total_seconds = Column(Integer, nullable=True)
     earned_amount = Column(Float, nullable=True)
 
-    # Relation avec la campagne
     campaign = relationship("Campaign", back_populates="listening_sessions")
 
     def to_dict(self):

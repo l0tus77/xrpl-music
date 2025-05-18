@@ -7,11 +7,10 @@ from sqlalchemy.orm import Session
 
 class PaymentService:
     def __init__(self):
-        self.active_listeners = {}  # {websocket_id: {campaign_id, listener_address, last_payment}}
+        self.active_listeners = {}
 
     async def start_listening_session(self, websocket: WebSocket, campaign_id: int, 
                                     listener_address: str, db: Session):
-        """Démarre une session d'écoute pour un utilisateur."""
         session_id = id(websocket)
         campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
         
@@ -29,11 +28,10 @@ class PaymentService:
 
         try:
             while True:
-                # Attendre le message de heartbeat du client
                 data = await websocket.receive_text()
                 if data == "playing":
                     await self._process_payment(session_id, db)
-                await asyncio.sleep(1)  # Attendre 1 seconde
+                await asyncio.sleep(1)
         except Exception as e:
             print(f"Error in listening session: {e}")
         finally:
@@ -41,7 +39,6 @@ class PaymentService:
                 del self.active_listeners[session_id]
 
     async def _process_payment(self, session_id: str, db: Session):
-        """Traite le paiement pour une seconde d'écoute."""
         listener_data = self.active_listeners[session_id]
         campaign = db.query(Campaign).filter(
             Campaign.id == listener_data["campaign_id"],
@@ -52,20 +49,16 @@ class PaymentService:
             await listener_data["websocket"].close()
             return
 
-        # Calculer le montant à payer
         amount_to_pay = min(campaign.amount_per_second, campaign.remaining_amount)
         
-        # Effectuer le paiement
         payment_result = await xrpl_service.send_payment(
             listener_data["listener_address"], 
             amount_to_pay
         )
 
         if payment_result["status"] == "success":
-            # Mettre à jour la campagne et l'auditeur
             campaign.remaining_amount -= amount_to_pay
             
-            # Si le montant restant est épuisé, marquer la campagne comme terminée
             if campaign.remaining_amount <= 0:
                 campaign.status = CampaignStatus.COMPLETED.value
             

@@ -5,7 +5,6 @@ router = APIRouter()
 
 @router.post("/auth/sign-request")
 async def create_sign_request(user_token: str = None):
-    """Crée une demande de signature pour la connexion via Xaman."""
     try:
         return await xaman_service.create_sign_request(user_token)
     except Exception as e:
@@ -14,7 +13,6 @@ async def create_sign_request(user_token: str = None):
 
 @router.get("/auth/verify/{payload_uuid}")
 async def verify_signature(payload_uuid: str):
-    """Vérifie la signature d'une demande de connexion."""
     try:
         result = await xaman_service.verify_signature(payload_uuid)
         if result["success"]:

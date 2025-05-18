@@ -18,12 +18,12 @@ class Campaign(Base):
     artist_address = Column(String, index=True)
     song_title = Column(String)
     song_url = Column(String)
-    total_amount = Column(Float)  # Montant total en XRP
-    amount_per_second = Column(Float)  # Montant par seconde d'écoute
-    remaining_amount = Column(Float)  # Montant restant à distribuer
+    total_amount = Column(Float)
+    amount_per_second = Column(Float)
+    remaining_amount = Column(Float)
     created_at = Column(DateTime, default=datetime.utcnow)
-    status = Column(String, default=CampaignStatus.UNPAID.value)  # unpaid, paid, completed, cancelled
-    payment_transaction_hash = Column(String, nullable=True)  # Hash de la transaction de paiement
+    status = Column(String, default=CampaignStatus.UNPAID.value)
+    payment_transaction_hash = Column(String, nullable=True)
 
     # Relations
     listeners = relationship("CampaignListener", back_populates="campaign")
@@ -52,7 +52,6 @@ class CampaignListener(Base):
     seconds_listened = Column(Integer, default=0)
     amount_earned = Column(Float, default=0.0)
     last_payment_time = Column(DateTime)
-    status = Column(String)  # active, completed
+    status = Column(String)
 
-    # Relations
     campaign = relationship("Campaign", back_populates="listeners") 

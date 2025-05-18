@@ -8,12 +8,10 @@ from .config import settings
 from .database import Base, engine, get_db
 from .routers import campaigns, auth, listening, websocket, currency, xaman
 
-# Créer les tables dans la base de données
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Configuration CORS pour le développement
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -22,7 +20,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Inclure les routers
 app.include_router(campaigns.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(listening.router, prefix="/api")
@@ -32,7 +29,6 @@ app.include_router(xaman.router, prefix="/api")
 
 @app.post("/api/auth/sign-request")
 async def create_sign_request(user_token: str = None):
-    """Crée une demande de signature pour la connexion via Xaman."""
     try:
         return await xaman_service.create_sign_request(user_token)
     except Exception as e:
@@ -41,7 +37,6 @@ async def create_sign_request(user_token: str = None):
 
 @app.get("/api/auth/verify/{payload_uuid}")
 async def verify_signature(payload_uuid: str):
-    """Vérifie la signature d'une demande de connexion."""
     try:
         result = await xaman_service.verify_signature(payload_uuid)
         if result["success"]:
@@ -52,13 +47,11 @@ async def verify_signature(payload_uuid: str):
 
 @app.get("/api/campaigns/active")
 async def get_active_campaigns(db: Session = Depends(get_db)):
-    """Récupère uniquement les campagnes payées et actives"""
     campaigns = db.query(Campaign).filter(Campaign.status == CampaignStatus.PAID.value).all()
     return [campaign.to_dict() for campaign in campaigns]
 
 @app.post("/api/campaigns")
 async def create_campaign(campaign_data: dict, db: Session = Depends(get_db)):
-    """Crée une nouvelle campagne"""
     campaign = Campaign(
         artist_address=campaign_data["artistAddress"],
         song_title=campaign_data["songTitle"],
@@ -80,7 +73,6 @@ async def websocket_endpoint(
     listener_address: str,
     db: Session = Depends(get_db)
 ):
-    """Endpoint WebSocket pour le tracking d'écoute"""
     await websocket.accept()
     await payment_service.start_listening_session(
         websocket,
@@ -91,4 +83,4 @@ async def websocket_endpoint(
 
 @app.get("/")
 def read_root():
-    return {"message": "Bienvenue sur l'API BidXRPL"} 
+    return {"message": "Bienvenue sur l'API XRPL Music"} 

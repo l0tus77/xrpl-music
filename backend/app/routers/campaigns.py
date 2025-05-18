@@ -29,7 +29,6 @@ async def delete_campaign(
     artist_address: str,
     db: Session = Depends(get_db)
 ):
-    """Supprime une campagne non payée"""
     try:
         campaign_service.delete_campaign(db, campaign_id, artist_address)
         return {"message": "Campagne supprimée avec succès"}
@@ -40,7 +39,6 @@ async def delete_campaign(
 
 @router.post("/campaigns", response_model=dict)
 async def create_campaign(campaign_data: CampaignCreate, db: Session = Depends(get_db)):
-    """Crée une nouvelle campagne en statut UNPAID"""
     try:
         campaign = await campaign_service.create_campaign(
             db=db,
@@ -55,7 +53,6 @@ async def create_campaign(campaign_data: CampaignCreate, db: Session = Depends(g
 
 @router.post("/campaigns/{campaign_id}/verify-payment", response_model=dict)
 async def verify_campaign_payment(campaign_id: int, payment_data: CampaignPayment, db: Session = Depends(get_db)):
-    """Vérifie le paiement d'une campagne et met à jour son statut"""
     try:
         campaign = await campaign_service.verify_and_update_payment(
             db=db,
@@ -70,12 +67,10 @@ async def verify_campaign_payment(campaign_id: int, payment_data: CampaignPaymen
 
 @router.get("/campaigns/active", response_model=List[dict])
 async def get_active_campaigns(db: Session = Depends(get_db)):
-    """Récupère uniquement les campagnes payées et actives"""
     campaigns = campaign_service.get_active_campaigns(db)
     return [campaign.to_dict() for campaign in campaigns]
 
 @router.get("/campaigns/artist/{artist_address}", response_model=List[dict])
 async def get_artist_campaigns(artist_address: str, db: Session = Depends(get_db)):
-    """Récupère toutes les campagnes d'un artiste"""
     campaigns = campaign_service.get_artist_campaigns(db, artist_address)
     return [campaign.to_dict() for campaign in campaigns] 

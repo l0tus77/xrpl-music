@@ -16,7 +16,6 @@ export const useXRPL = () => {
   const [wallet, setWallet] = useState<any>(null);
 
   useEffect(() => {
-    // Vérifier si le wallet est déjà connecté
     checkConnection();
   }, []);
 

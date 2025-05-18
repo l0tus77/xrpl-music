@@ -15,14 +15,11 @@ export const XamanLoginButton: React.FC<XamanLoginButtonProps> = ({ onLogin }) =
             setIsLoading(true);
             setError(null);
 
-            // Créer une demande de signature
             const signRequest = await AuthService.createSignRequest();
             setQrCode(signRequest.qr_url);
 
-            // Écouter les mises à jour WebSocket
             const payloadUuid = await AuthService.listenToWebSocket(signRequest.websocket_url);
 
-            // Vérifier la signature
             const verifyResult = await AuthService.verifySignature(payloadUuid);
             
             if (verifyResult.success && verifyResult.account && verifyResult.user_token) {
@@ -46,13 +43,13 @@ export const XamanLoginButton: React.FC<XamanLoginButtonProps> = ({ onLogin }) =
                     disabled={isLoading}
                     className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
-                    {isLoading ? 'Chargement...' : 'Se connecter avec Xaman'}
+                    {isLoading ? 'Chargement...' : 'Se connecter avec Xaman (XUMM)'}
                 </button>
             )}
 
             {qrCode && (
                 <div className="flex flex-col items-center gap-2">
-                    <p className="text-sm text-gray-600">Scannez le QR code avec Xaman</p>
+                    <p className="text-sm text-gray-600">Scannez le QR code avec Xaman (XUMM)</p>
                     <img src={qrCode} alt="QR Code Xaman" className="w-48 h-48" />
                     <button
                         onClick={() => setQrCode(null)}

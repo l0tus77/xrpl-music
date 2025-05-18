@@ -6,7 +6,6 @@ from ..config import settings
 class CampaignService:
     @staticmethod
     async def create_campaign(db: Session, artist_address: str, song_title: str, song_url: str, amount: float) -> Campaign:
-        """Crée une nouvelle campagne en statut UNPAID"""
         campaign = Campaign(
             artist_address=artist_address,
             song_title=song_title,
@@ -23,13 +22,11 @@ class CampaignService:
 
     @staticmethod
     async def verify_and_update_payment(db: Session, campaign_id: int, transaction_hash: str) -> Campaign:
-        """Vérifie le paiement et met à jour le statut de la campagne"""
         campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
         if not campaign:
             raise ValueError("Campagne non trouvée")
 
         try:
-            # Vérifier la transaction sur XRPL
             transaction = await xrpl_service.verify_transaction(transaction_hash)
             print("Transaction XRPL:", transaction)
 
@@ -39,7 +36,6 @@ class CampaignService:
             if transaction.get("status") != "success":
                 raise ValueError(transaction.get("message", "La transaction n'a pas pu être vérifiée"))
             
-            # Vérifier que le montant correspond
             amount = transaction.get("amount")
             if amount is None:
                 raise ValueError("Montant de la transaction non trouvé")
@@ -59,21 +55,18 @@ class CampaignService:
 
     @staticmethod
     def get_active_campaigns(db: Session):
-        """Récupère uniquement les campagnes payées et actives"""
         return db.query(Campaign).filter(
             Campaign.status == CampaignStatus.PAID.value
         ).all()
 
     @staticmethod
     def get_artist_campaigns(db: Session, artist_address: str):
-        """Récupère toutes les campagnes d'un artiste, quel que soit leur statut"""
         return db.query(Campaign).filter(
             Campaign.artist_address == artist_address
         ).all()
 
     @staticmethod
     def delete_campaign(db: Session, campaign_id: int, artist_address: str):
-        """Supprime une campagne non payée"""
         campaign = db.query(Campaign).filter(
             Campaign.id == campaign_id,
             Campaign.artist_address == artist_address,

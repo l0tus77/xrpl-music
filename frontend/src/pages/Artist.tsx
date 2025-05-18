@@ -40,7 +40,7 @@ const ArtistDashboard: React.FC = () => {
     const verifyPayment = async (campaignId: number, transactionHash: string) => {
         let attempts = 0;
         const maxAttempts = 5;
-        const delay = 2000; // 2 secondes
+        const delay = 2000;
 
         while (attempts < maxAttempts) {
             try {
@@ -78,7 +78,6 @@ const ArtistDashboard: React.FC = () => {
             });
             console.log('Campagne créée:', campaign);
 
-            // Créer la demande de paiement Xaman
             console.log('Création de la demande de paiement...');
             const paymentRequest = await XamanService.createPaymentRequest(
                 campaign.total_amount,
@@ -86,12 +85,10 @@ const ArtistDashboard: React.FC = () => {
             );
             console.log('Demande de paiement créée:', paymentRequest);
 
-            // Afficher le QR code et stocker les informations nécessaires
             setQrCode(paymentRequest.qr_url);
             setPaymentUuid(paymentRequest.payload_uuid);
             setPendingCampaignId(campaign.id);
 
-            // Écouter le websocket pour la confirmation du paiement
             try {
                 console.log('Attente de la confirmation via WebSocket...');
                 const payloadUuid = await XamanService.listenToWebSocket(paymentRequest.websocket_url);
@@ -109,7 +106,6 @@ const ArtistDashboard: React.FC = () => {
                         setSuccess('Paiement vérifié avec succès');
                         await loadArtistCampaigns();
                         
-                        // Réinitialiser le formulaire et les états
                         setSongTitle('');
                         setSongUrl('');
                         setAmount('');

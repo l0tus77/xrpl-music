@@ -10,16 +10,14 @@ class XamanService:
         self.sdk = XummSdk(settings.XAMAN_API_KEY, settings.XAMAN_API_SECRET)
 
     async def create_payment_request(self, amount: float, description: str) -> dict:
-        """Crée une demande de paiement via Xaman (XUMM)"""
         start_time = time.time()
         print(f"Début de la création de la demande de paiement - {time.strftime('%H:%M:%S')}")
         
         try:
-            # Créer la payload de transaction
             payload = {
                 "txjson": {
                     "TransactionType": "Payment",
-                    "Amount": str(int(amount * 1000000)),  # Convertir en drops
+                    "Amount": str(int(amount * 1000000)),
                     "Destination": settings.XRPL_COLD_WALLET,
                 },
                 "custom_meta": {
@@ -30,13 +28,12 @@ class XamanService:
                 },
                 "options": {
                     "submit": True,
-                    "expire": 15,  # Expire après 15 minutes
+                    "expire": 15,
                 }
             }
 
             print(f"Payload de base créée - Temps écoulé: {time.time() - start_time:.2f}s")
 
-            # Utiliser to_thread pour exécuter la méthode synchrone dans un thread séparé
             response = await asyncio.to_thread(self.sdk.payload.create, payload)
             print(f"Réponse XUMM reçue - Temps écoulé: {time.time() - start_time:.2f}s")
 
@@ -57,7 +54,6 @@ class XamanService:
             return None
 
     async def create_sign_request(self, user_token: str = None) -> dict:
-        """Crée une demande de signature pour la connexion"""
         start_time = time.time()
         print(f"Début de la création de la demande de signature - {time.strftime('%H:%M:%S')}")
         
@@ -68,7 +64,7 @@ class XamanService:
                 },
                 "options": {
                     "submit": False,
-                    "expire": 5,  # Expire après 5 minutes
+                    "expire": 5,
                     "return_url": {
                         "web": f"{settings.FRONTEND_URL}"
                     }
@@ -77,7 +73,6 @@ class XamanService:
             if user_token:
                 payload["user_token"] = user_token
 
-            # Utiliser to_thread pour exécuter la méthode synchrone dans un thread séparé
             response = await asyncio.to_thread(self.sdk.payload.create, payload)
             print(f"Réponse de signature reçue - Temps écoulé: {time.time() - start_time:.2f}s")
             
@@ -96,12 +91,10 @@ class XamanService:
             return None
 
     async def verify_signature(self, payload_uuid: str) -> dict:
-        """Vérifie une signature via XUMM"""
         start_time = time.time()
         print(f"Début de la vérification de signature - {time.strftime('%H:%M:%S')}")
         
         try:
-            # Utiliser to_thread pour exécuter la méthode synchrone dans un thread séparé
             payload = await asyncio.to_thread(self.sdk.payload.get, payload_uuid)
             print(f"Réponse de vérification reçue - Temps écoulé: {time.time() - start_time:.2f}s")
             
@@ -125,12 +118,10 @@ class XamanService:
             }
 
     async def verify_payment(self, payload_uuid: str) -> dict:
-        """Vérifie le statut d'un paiement via XUMM"""
         start_time = time.time()
         print(f"Début de la vérification du paiement - {time.strftime('%H:%M:%S')}")
         
         try:
-            # Utiliser to_thread pour exécuter la méthode synchrone dans un thread séparé
             payload = await asyncio.to_thread(self.sdk.payload.get, payload_uuid)
             print(f"Réponse de vérification reçue - Temps écoulé: {time.time() - start_time:.2f}s")
             

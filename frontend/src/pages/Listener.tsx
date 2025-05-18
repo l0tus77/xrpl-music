@@ -6,7 +6,7 @@ import { CurrencyService } from '../services/currency.service';
 import { AlertMessage } from '../types';
 import Header from '../components/Header';
 
-const HEARTBEAT_INTERVAL = 5000; // 5 secondes
+const HEARTBEAT_INTERVAL = 5000;
 
 interface ListeningStatus {
     isNormal: boolean;
@@ -48,13 +48,11 @@ const ListenerDashboard: React.FC = () => {
             if (account) {
                 await loadHistory();
             }
-            // Charger le prix XRP
             await updateXRPPrice();
         };
 
         init();
 
-        // Mise à jour périodique du prix XRP
         const priceInterval = setInterval(updateXRPPrice, 30000);
 
         return () => {
@@ -233,12 +231,10 @@ const ListenerDashboard: React.FC = () => {
         const isMuted = audio.muted;
 
         if ((currentVolume === 0 || isMuted) && previousVolume > 0) {
-            // Volume vient d'être coupé
             setWasPlaying(!audio.paused);
             audio.pause();
             showAlert("Volume coupé - Lecture en pause", 'warning');
         } else if (currentVolume > 0 && !isMuted && previousVolume === 0) {
-            // Volume vient d'être rétabli
             if (wasPlaying) {
                 audio.play();
                 showAlert("Volume rétabli - Reprise de la lecture", 'success');
@@ -250,12 +246,10 @@ const ListenerDashboard: React.FC = () => {
     const handleMuteChange = (event: React.SyntheticEvent<HTMLAudioElement>) => {
         const audio = event.currentTarget;
         if (audio.muted) {
-            // Son vient d'être coupé
             setWasPlaying(!audio.paused);
             audio.pause();
             showAlert("Son coupé - Lecture en pause", 'warning');
         } else if (!audio.muted && audio.volume > 0) {
-            // Son vient d'être rétabli
             if (wasPlaying) {
                 audio.play();
                 showAlert("Son rétabli - Reprise de la lecture", 'success');
@@ -274,7 +268,6 @@ const ListenerDashboard: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-            {/* Alerte centrale */}
             {alert && (
                 <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
                     <div className={`px-4 py-3 rounded-lg shadow-lg ${
@@ -289,9 +282,7 @@ const ListenerDashboard: React.FC = () => {
 
             <Header userType="listener" account={account || ''} />
 
-            {/* Contenu principal */}
             <main className="max-w-4xl mx-auto px-4 py-8">
-                {/* Notifications */}
                 {listeningStatus && (
                     <div className={`fixed top-4 right-4 z-50 w-80 transform transition-all duration-300 ease-in-out ${
                         listeningStatus.isNormal ? 'translate-x-0' : 'translate-x-0'
@@ -363,7 +354,6 @@ const ListenerDashboard: React.FC = () => {
                     </div>
                 )}
 
-                {/* Section des campagnes */}
                 <div className="bg-white rounded-xl shadow-md overflow-hidden">
                     <div className="p-6 border-b border-gray-100">
                         <h2 className="text-2xl font-bold text-gray-800">Campagnes disponibles</h2>
@@ -412,7 +402,6 @@ const ListenerDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Section historique */}
                 {listeningHistory.length > 0 && (
                     <div className="bg-white rounded-xl shadow-md mt-8 overflow-hidden">
                         <button 

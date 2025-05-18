@@ -24,7 +24,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [userToken, setUserToken] = useState<string | null>(null);
 
     useEffect(() => {
-        // Charger l'état d'authentification depuis le localStorage
         const savedAccount = localStorage.getItem('xrpl_account');
         const savedToken = localStorage.getItem('xrpl_token');
         
@@ -40,7 +39,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAccount(newAccount);
         setUserToken(newUserToken);
         
-        // Sauvegarder dans le localStorage
         localStorage.setItem('xrpl_account', newAccount);
         localStorage.setItem('xrpl_token', newUserToken);
     };
@@ -50,7 +48,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAccount(null);
         setUserToken(null);
         
-        // Nettoyer le localStorage
         localStorage.removeItem('xrpl_account');
         localStorage.removeItem('xrpl_token');
     };

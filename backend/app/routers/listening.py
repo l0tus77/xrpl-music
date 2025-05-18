@@ -15,7 +15,6 @@ def get_active_session(
     listener_address: str,
     db: Session = Depends(get_db)
 ):
-    """Récupère la session active d'un auditeur"""
     session = db.query(ListeningSession).filter(
         ListeningSession.listener_address == listener_address,
         ListeningSession.end_time.is_(None)
@@ -31,7 +30,6 @@ def start_listening_session(
     session_data: ListeningSessionCreate,
     db: Session = Depends(get_db)
 ):
-    # Vérifier si la campagne existe et est active
     campaign = db.query(Campaign).filter(
         Campaign.id == session_data.campaign_id,
         Campaign.status == CampaignStatus.PAID.value
@@ -40,7 +38,6 @@ def start_listening_session(
     if not campaign:
         raise HTTPException(status_code=404, detail="Campagne non trouvée ou inactive")
     
-    # Vérifier si l'utilisateur a déjà une session active
     active_session = db.query(ListeningSession).filter(
         ListeningSession.listener_address == session_data.listener_address,
         ListeningSession.end_time.is_(None)
@@ -49,7 +46,6 @@ def start_listening_session(
     if active_session:
         raise HTTPException(status_code=400, detail="Une session d'écoute est déjà en cours")
     
-    # Créer la nouvelle session
     session = ListeningSession(
         campaign_id=session_data.campaign_id,
         listener_address=session_data.listener_address
@@ -66,7 +62,6 @@ def stop_listening_session(
     session_id: int,
     db: Session = Depends(get_db)
 ):
-    # Récupérer la session
     session = db.query(ListeningSession).filter(
         ListeningSession.id == session_id,
         ListeningSession.end_time.is_(None)
@@ -75,23 +70,19 @@ def stop_listening_session(
     if not session:
         raise HTTPException(status_code=404, detail="Session non trouvée ou déjà terminée")
     
-    # Calculer la durée et le montant gagné
     end_time = datetime.utcnow()
     duration = (end_time - session.start_time).total_seconds()
     
-    # Récupérer la campagne
     campaign = db.query(Campaign).filter(Campaign.id == session.campaign_id).first()
     earned_amount = min(
         duration * campaign.amount_per_second,
         campaign.remaining_amount
     )
     
-    # Mettre à jour la session
     session.end_time = end_time
     session.total_seconds = int(duration)
     session.earned_amount = earned_amount
     
-    # Mettre à jour le montant restant de la campagne
     campaign.remaining_amount -= earned_amount
     if campaign.remaining_amount <= 0:
         campaign.status = "completed"

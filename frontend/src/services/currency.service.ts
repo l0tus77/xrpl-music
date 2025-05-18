@@ -11,7 +11,7 @@ export const CurrencyService = {
             return data.price;
         } catch (error) {
             console.error('Erreur lors de la récupération du prix XRP:', error);
-            return 0.5; // Valeur par défaut en cas d'erreur
+            return 0.5;
         }
     }
 };

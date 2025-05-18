@@ -14,7 +14,7 @@ const Header: React.FC<HeaderProps> = ({ userType, account }) => {
                     <div>
                         <Link to="/" className="block">
                             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-                                BidXRPL Music
+                                XRPL Music
                             </h1>
                             <p className="text-sm text-gray-600 mt-1">
                                 {userType === 'artist' ? 'Espace Artiste' : 'Écoutez de la musique, gagnez des XRP'}

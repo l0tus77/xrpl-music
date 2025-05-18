@@ -60,7 +60,6 @@ export const XamanService = {
                 reject(error);
             };
             
-            // Timeout après 5 minutes
             setTimeout(() => {
                 ws.close();
                 reject(new Error('Timeout de la connexion WebSocket'));
