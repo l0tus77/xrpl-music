@@ -64,4 +64,4 @@ Rejoignez-nous pour tester la plateforme ou contribuer à son évolution.
 
 ## Demo
 
-![](Demo.mp4)
+![Watch the demo](https://img.youtube.com/vi/TYUxXw7zpVE/maxresdefault.jpg)](https://youtu.be/TYUxXw7zpVE)
