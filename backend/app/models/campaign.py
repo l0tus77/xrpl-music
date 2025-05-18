@@ -1,9 +1,8 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
-Base = declarative_base()
+from app.database import Base
 
 class Campaign(Base):
     __tablename__ = "campaigns"
@@ -16,10 +15,24 @@ class Campaign(Base):
     amount_per_second = Column(Float)  # Montant par seconde d'écoute
     remaining_amount = Column(Float)  # Montant restant à distribuer
     created_at = Column(DateTime, default=datetime.utcnow)
-    status = Column(String)  # active, completed, cancelled
+    status = Column(String, default="active")  # active, completed, cancelled
 
     # Relations
     listeners = relationship("CampaignListener", back_populates="campaign")
+    listening_sessions = relationship("ListeningSession", back_populates="campaign")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "artist_address": self.artist_address,
+            "song_title": self.song_title,
+            "song_url": self.song_url,
+            "total_amount": self.total_amount,
+            "amount_per_second": self.amount_per_second,
+            "remaining_amount": self.remaining_amount,
+            "created_at": self.created_at.isoformat(),
+            "status": self.status
+        }
 
 class CampaignListener(Base):
     __tablename__ = "campaign_listeners"

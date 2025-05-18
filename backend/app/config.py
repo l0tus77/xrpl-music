@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     XRPL_NODE_URL: str = os.getenv("XRPL_NODE_URL", "wss://s.altnet.rippletest.net:51233")
     XRPL_COLD_WALLET: str = ""  # Wallet principal pour les paiements
     XRPL_HOT_WALLET_SEED: str = os.getenv("XRPL_HOT_WALLET_SEED", "")
-    PAYMENT_PER_SECOND: float = float(os.getenv("PAYMENT_PER_SECOND", "0.001"))
+    PAYMENT_PER_SECOND: float = 0.001  # Taux fixe de 0.001 XRP par seconde
     MIN_CAMPAIGN_AMOUNT: float = float(os.getenv("MIN_CAMPAIGN_AMOUNT", "20.0"))
     
     # Configuration Xaman (XUMM)

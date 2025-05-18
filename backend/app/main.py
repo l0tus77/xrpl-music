@@ -1,23 +1,15 @@
 from fastapi import FastAPI, WebSocket, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from .models.campaign import Base, Campaign
+from .models.campaign import Campaign
 from .services.payment_service import payment_service
 from .services.xaman_service import xaman_service
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from sqlalchemy.engine import URL
 from .config import settings
+from .database import Base, engine, get_db
+from .routers import campaigns, auth, listening, websocket, currency
 
-# Création de la base de données avec SQLite
-engine = create_engine(
-    "sqlite:///xrpl_music.db",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool
-)
+# Créer les tables dans la base de données
 Base.metadata.create_all(bind=engine)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 app = FastAPI()
 
@@ -30,13 +22,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Dependency pour obtenir la session DB
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Inclure les routers
+app.include_router(campaigns.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
+app.include_router(listening.router, prefix="/api")
+app.include_router(websocket.router)
+app.include_router(currency.router, prefix="/api")
 
 @app.post("/api/auth/sign-request")
 async def create_sign_request(user_token: str = None):
@@ -95,4 +86,8 @@ async def websocket_endpoint(
         campaign_id,
         listener_address,
         db
-    ) 
+    )
+
+@app.get("/")
+def read_root():
+    return {"message": "Bienvenue sur l'API BidXRPL"} 
