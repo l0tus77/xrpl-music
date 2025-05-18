@@ -64,4 +64,6 @@ Rejoignez-nous pour tester la plateforme ou contribuer à son évolution.
 
 ## Demo
 
-![Watch the demo](https://youtu.be/TYUxXw7zpVE)
+https://github.com/user-attachments/assets/761c21be-af5d-4260-a53d-44f89d2ab5ee
+
+
