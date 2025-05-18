@@ -13,6 +13,7 @@ export interface Campaign {
     remaining_amount: number;
     status: string;
     created_at: string;
+    payment_transaction_hash?: string;
 }
 
 export interface ListeningSession {

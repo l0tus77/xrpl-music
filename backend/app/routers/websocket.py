@@ -8,7 +8,7 @@ from typing import Optional
 
 from app.database import get_db
 from app.models.listening import ListeningSession
-from app.models.campaign import Campaign
+from app.models.campaign import Campaign, CampaignStatus
 
 # Configuration du logging
 logging.basicConfig(level=logging.INFO)
@@ -142,15 +142,15 @@ async def websocket_endpoint(
     ping_task: Optional[asyncio.Task] = None
 
     try:
-        # Vérifier si la campagne existe et est active
+        # Vérifier si la campagne existe et est payée
         campaign = db.query(Campaign).filter(
             Campaign.id == campaign_id,
-            Campaign.status == "active"
+            Campaign.status == CampaignStatus.PAID.value
         ).first()
         
         if not campaign:
             logger.warning(f"Tentative de connexion à une campagne inactive/inexistante: {campaign_id}")
-            await handle_websocket_error(websocket, 4000, client_id)
+            await websocket.close(code=4000)
             return
 
         # Vérifier la session active
@@ -161,8 +161,8 @@ async def websocket_endpoint(
         ).first()
 
         if not session:
-            logger.warning(f"Aucune session active trouvée pour: {client_id}")
-            await handle_websocket_error(websocket, 4001, client_id)
+            logger.warning(f"Aucune session active trouvée pour: {listener_address}")
+            await websocket.close(code=4001)
             return
 
         await manager.connect(websocket, client_id)

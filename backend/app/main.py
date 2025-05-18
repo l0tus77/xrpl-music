@@ -1,12 +1,12 @@
 from fastapi import FastAPI, WebSocket, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from .models.campaign import Campaign
-from .services.payment_service import payment_service
+from .models.campaign import Campaign, CampaignStatus
+from .services.payment_service import payment_service, PaymentService
 from .services.xaman_service import xaman_service
 from .config import settings
 from .database import Base, engine, get_db
-from .routers import campaigns, auth, listening, websocket, currency
+from .routers import campaigns, auth, listening, websocket, currency, xaman
 
 # Créer les tables dans la base de données
 Base.metadata.create_all(bind=engine)
@@ -28,6 +28,7 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(listening.router, prefix="/api")
 app.include_router(websocket.router)
 app.include_router(currency.router, prefix="/api")
+app.include_router(xaman.router, prefix="/api")
 
 @app.post("/api/auth/sign-request")
 async def create_sign_request(user_token: str = None):
@@ -51,9 +52,9 @@ async def verify_signature(payload_uuid: str):
 
 @app.get("/api/campaigns/active")
 async def get_active_campaigns(db: Session = Depends(get_db)):
-    """Récupère toutes les campagnes actives"""
-    campaigns = db.query(Campaign).filter(Campaign.status == "active").all()
-    return campaigns
+    """Récupère uniquement les campagnes payées et actives"""
+    campaigns = db.query(Campaign).filter(Campaign.status == CampaignStatus.PAID.value).all()
+    return [campaign.to_dict() for campaign in campaigns]
 
 @app.post("/api/campaigns")
 async def create_campaign(campaign_data: dict, db: Session = Depends(get_db)):
@@ -65,12 +66,12 @@ async def create_campaign(campaign_data: dict, db: Session = Depends(get_db)):
         total_amount=campaign_data["amount"],
         amount_per_second=settings.PAYMENT_PER_SECOND,
         remaining_amount=campaign_data["amount"],
-        status="active"
+        status=CampaignStatus.UNPAID.value
     )
     db.add(campaign)
     db.commit()
     db.refresh(campaign)
-    return campaign
+    return campaign.to_dict()
 
 @app.websocket("/ws/listen/{campaign_id}/{listener_address}")
 async def websocket_endpoint(

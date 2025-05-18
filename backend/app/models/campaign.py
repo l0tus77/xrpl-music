@@ -1,8 +1,15 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
+import enum
 
 from app.database import Base
+
+class CampaignStatus(enum.Enum):
+    UNPAID = "unpaid"
+    PAID = "paid"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
 
 class Campaign(Base):
     __tablename__ = "campaigns"
@@ -15,7 +22,8 @@ class Campaign(Base):
     amount_per_second = Column(Float)  # Montant par seconde d'écoute
     remaining_amount = Column(Float)  # Montant restant à distribuer
     created_at = Column(DateTime, default=datetime.utcnow)
-    status = Column(String, default="active")  # active, completed, cancelled
+    status = Column(String, default=CampaignStatus.UNPAID.value)  # unpaid, paid, completed, cancelled
+    payment_transaction_hash = Column(String, nullable=True)  # Hash de la transaction de paiement
 
     # Relations
     listeners = relationship("CampaignListener", back_populates="campaign")
@@ -31,7 +39,8 @@ class Campaign(Base):
             "amount_per_second": self.amount_per_second,
             "remaining_amount": self.remaining_amount,
             "created_at": self.created_at.isoformat(),
-            "status": self.status
+            "status": self.status,
+            "payment_transaction_hash": self.payment_transaction_hash
         }
 
 class CampaignListener(Base):

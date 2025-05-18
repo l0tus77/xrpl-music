@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import WebSocket
 import asyncio
 from .xrpl_service import xrpl_service
-from ..models.campaign import Campaign, CampaignListener
+from ..models.campaign import Campaign, CampaignStatus, CampaignListener
 from sqlalchemy.orm import Session
 
 class PaymentService:
@@ -15,7 +15,8 @@ class PaymentService:
         session_id = id(websocket)
         campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
         
-        if not campaign or campaign.status != "active":
+        if not campaign or campaign.status != CampaignStatus.PAID.value:
+            print(f"Session refusée - Campagne {campaign_id} non trouvée ou non payée")
             await websocket.close()
             return
 
@@ -43,7 +44,8 @@ class PaymentService:
         """Traite le paiement pour une seconde d'écoute."""
         listener_data = self.active_listeners[session_id]
         campaign = db.query(Campaign).filter(
-            Campaign.id == listener_data["campaign_id"]
+            Campaign.id == listener_data["campaign_id"],
+            Campaign.status == CampaignStatus.PAID.value
         ).first()
 
         if not campaign or campaign.remaining_amount <= 0:
@@ -63,15 +65,29 @@ class PaymentService:
             # Mettre à jour la campagne et l'auditeur
             campaign.remaining_amount -= amount_to_pay
             
+            # Si le montant restant est épuisé, marquer la campagne comme terminée
+            if campaign.remaining_amount <= 0:
+                campaign.status = CampaignStatus.COMPLETED.value
+            
             listener = db.query(CampaignListener).filter(
                 CampaignListener.campaign_id == campaign.id,
                 CampaignListener.listener_address == listener_data["listener_address"]
             ).first()
             
-            if listener:
-                listener.seconds_listened += 1
-                listener.amount_earned += amount_to_pay
-                listener.last_payment_time = datetime.utcnow()
+            if not listener:
+                listener = CampaignListener(
+                    campaign_id=campaign.id,
+                    listener_address=listener_data["listener_address"],
+                    seconds_listened=0,
+                    amount_earned=0.0,
+                    last_payment_time=datetime.utcnow(),
+                    status="active"
+                )
+                db.add(listener)
+            
+            listener.seconds_listened += 1
+            listener.amount_earned += amount_to_pay
+            listener.last_payment_time = datetime.utcnow()
             
             db.commit()
 

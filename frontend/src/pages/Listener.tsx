@@ -4,6 +4,7 @@ import { CampaignService, Campaign } from '../services/campaign.service';
 import { ListenerService, ListeningSession } from '../services/listener.service';
 import { CurrencyService } from '../services/currency.service';
 import { AlertMessage } from '../types';
+import Header from '../components/Header';
 
 const HEARTBEAT_INTERVAL = 5000; // 5 secondes
 
@@ -286,25 +287,7 @@ const ListenerDashboard: React.FC = () => {
                 </div>
             )}
 
-            {/* Header */}
-            <header className="bg-white shadow-md">
-                <div className="max-w-7xl mx-auto px-4 py-6">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
-                                BidXRPL Music
-                            </h1>
-                            <p className="text-sm text-gray-600 mt-1">
-                                Écoutez de la musique, gagnez des XRP
-                            </p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow-sm p-3 border border-gray-100">
-                            <p className="text-xs text-gray-500 mb-1">Compte auditeur</p>
-                            <p className="font-mono text-sm truncate max-w-[200px]">{account}</p>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            <Header userType="listener" account={account || ''} />
 
             {/* Contenu principal */}
             <main className="max-w-4xl mx-auto px-4 py-8">

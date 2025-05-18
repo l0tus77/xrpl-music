@@ -5,7 +5,7 @@ from typing import List
 
 from app.database import get_db
 from app.models.listening import ListeningSession
-from app.models.campaign import Campaign
+from app.models.campaign import Campaign, CampaignStatus
 from app.schemas.listening import ListeningSessionCreate, ListeningSession as ListeningSessionSchema
 
 router = APIRouter()
@@ -34,7 +34,7 @@ def start_listening_session(
     # Vérifier si la campagne existe et est active
     campaign = db.query(Campaign).filter(
         Campaign.id == session_data.campaign_id,
-        Campaign.status == "active"
+        Campaign.status == CampaignStatus.PAID.value
     ).first()
     
     if not campaign:
